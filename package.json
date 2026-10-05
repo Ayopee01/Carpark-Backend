@@ -1,0 +1,60 @@
+{
+  "name": "smart-carpark-api",
+  "version": "1.0.0",
+  "description": "Backend API for Smart Carpark admin system",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "pretest": "node -e \"require('fs').rmSync('.test-dist', { recursive: true, force: true })\" && tsc -p test/tsconfig.json",
+    "test": "node --env-file=test/support/test.env --test .test-dist/test/*.test.js .test-dist/test/helpers/*.test.js",
+    "prisma:generate": "prisma generate",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate deploy",
+    "db:seed": "prisma db seed",
+    "db:seed:admin": "tsx prisma/seed/admin.ts",
+    "db:seed:transactions": "tsx prisma/seed/transactions.ts",
+    "db:studio": "prisma studio",
+    "docker:db": "docker compose up -d db"
+  },
+  "keywords": [
+    "nodejs",
+    "express",
+    "api",
+    "smart-carpark"
+  ],
+  "author": "OpenAI",
+  "license": "MIT",
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.10.0",
+    "@prisma/client": "^7.10.0",
+    "cors": "^2.8.5",
+    "dotenv": "^18.0.5",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.7.0",
+    "helmet": "^8.3.0",
+    "morgan": "^1.12.1",
+    "multer": "^2.4.0",
+    "omise": "^1.1.0",
+    "pg": "^8.23.1",
+    "prisma": "^7.10.0",
+    "swagger-ui-express": "^5.0.1",
+    "tsx": "^4.23.15",
+    "ws": "^8.22.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/morgan": "^1.9.10",
+    "@types/multer": "^2.3.0",
+    "@types/node": "^24.19.1",
+    "@types/pg": "^8.23.1",
+    "@types/swagger-ui-express": "^4.1.8",
+    "@types/ws": "^8.18.2",
+    "typescript": "^7.0.2"
+  }
+}
