@@ -1,0 +1,59 @@
+services:
+  api:
+    # CI/CD ตั้ง API_IMAGE เป็น image จาก GHCR (ghcr.io/<owner>/<repo>:sha-xxxxxxx) ถ้าไม่ตั้งจะ build จาก source บนเครื่อง
+    image: ${API_IMAGE:-smart-carpark-api:local}
+    build: .
+    container_name: smart-carpark-api
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-smart_carpark}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@db:5432/${POSTGRES_DB:-smart_carpark_uat}?schema=public
+    depends_on:
+      db:
+        condition: service_healthy
+    # port ที่ API listen ภายใน Docker network อ่านจาก PORT ใน .env (reverse proxy ต้องชี้มาที่ port นี้)
+    expose:
+      - "${PORT:?PORT is required}"
+    healthcheck:
+      test: [ "CMD-SHELL", "node -e \"fetch('http://127.0.0.1:' + process.env.PORT + '/health').then((r) => { process.exitCode = r.ok ? 0 : 1; }).catch(() => { process.exitCode = 1; })\"" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    volumes:
+      # เก็บไฟล์ upload นอก repo/container เพื่อไม่ให้หายตอน redeploy
+      - ${UPLOADS_HOST_PATH:-./uploads}:/app/uploads
+    networks:
+      - carpark-network
+      - npm-network
+
+  db:
+    image: postgres:16-alpine
+    container_name: smart-carpark-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-smart_carpark_uat}
+      POSTGRES_USER: ${POSTGRES_USER:-smart_carpark}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-smart_carpark} -d $${POSTGRES_DB:-smart_carpark_uat}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - carpark-network
+
+volumes:
+  postgres_data:
+
+networks:
+  carpark-network:
+    driver: bridge
+
+  npm-network:
+    external: true

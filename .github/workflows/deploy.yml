@@ -1,0 +1,89 @@
+name: Deploy
+
+# Deploy ขึ้น Production: CI เรียกหลัง push image แล้ว หรือกด Run workflow เองเพื่อ deploy/rollback ไปที่ commit ที่ CI เคย build image ไว้
+on:
+  workflow_call:
+    inputs:
+      ref:
+        type: string
+        required: true
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Commit SHA บน main ที่ CI build image ไว้แล้ว
+        type: string
+        required: true
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    # ยังไม่มี server: ไม่ได้ตั้ง SSH_HOST จะข้ามทุก step (job ไม่ fail) ตั้ง secrets ครบเมื่อไร deploy จะรันเองโดยไม่ต้องแก้ไฟล์นี้
+    # (if: อ่าน secrets ตรงๆ ไม่ได้ ต้องผ่าน env)
+    env:
+      DEPLOY_CONFIGURED: ${{ secrets.SSH_HOST != '' }}
+    steps:
+      - name: Skip deploy
+        if: env.DEPLOY_CONFIGURED != 'true'
+        run: echo "::notice::ยังไม่ได้ตั้ง SSH_HOST ใน environment production จึงข้ามการ deploy"
+      # แปลง ref เป็น commit เต็มและชื่อ image sha-<7 ตัว> ให้ตรงกับที่ CI push ไว้
+      - uses: actions/checkout@v4
+        if: env.DEPLOY_CONFIGURED == 'true'
+        with:
+          ref: ${{ inputs.ref }}
+      - name: Resolve image
+        if: env.DEPLOY_CONFIGURED == 'true'
+        id: target
+        run: |
+          sha="$(git rev-parse HEAD)"
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "image=ghcr.io/${GITHUB_REPOSITORY,,}:sha-${sha::7}" >> "$GITHUB_OUTPUT"
+
+      # ต้องตั้ง secrets ใน environment: SSH_HOST, SSH_USER, SSH_PRIVATE_KEY, DEPLOY_PATH
+      # ไม่บังคับ: SSH_PORT (default 22), SSH_KNOWN_HOSTS (ผลของ ssh-keyscan ที่ตรวจแล้ว ถ้าไม่ตั้งจะ scan ตอน deploy)
+      - name: Setup SSH key
+        if: env.DEPLOY_CONFIGURED == 'true'
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_PORT: ${{ secrets.SSH_PORT || 22 }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          if [ -n "$SSH_KNOWN_HOSTS" ]; then
+            echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
+          else
+            ssh-keyscan -p "$SSH_PORT" "$SSH_HOST" >> ~/.ssh/known_hosts
+          fi
+
+      # checkout commit เป้าหมายก่อน เพื่อให้รัน deploy.sh และ docker-compose.yml เวอร์ชันเดียวกับ image
+      # ส่ง GITHUB_TOKEN ทาง stdin ให้ server login GHCR ชั่วคราว (token หมดอายุเมื่อ job จบ) แล้ว logout หลัง deploy
+      - name: Run deploy script on server
+        if: env.DEPLOY_CONFIGURED == 'true'
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_PORT: ${{ secrets.SSH_PORT || 22 }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEPLOY_SHA: ${{ steps.target.outputs.sha }}
+          API_IMAGE: ${{ steps.target.outputs.image }}
+        run: |
+          echo "Deploying $API_IMAGE to production"
+          printf '%s' "$REGISTRY_TOKEN" | ssh -i ~/.ssh/deploy_key -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" \
+            "cd '$DEPLOY_PATH' \
+              && git fetch --quiet origin '$DEPLOY_SHA' \
+              && git checkout --quiet --detach '$DEPLOY_SHA' \
+              && docker login ghcr.io -u '${{ github.actor }}' --password-stdin >/dev/null \
+              && DEPLOY_REF='$DEPLOY_SHA' API_IMAGE='$API_IMAGE' sh scripts/deploy.sh; \
+            rc=\$?; docker logout ghcr.io >/dev/null; exit \$rc"

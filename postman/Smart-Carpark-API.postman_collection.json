@@ -1,0 +1,1622 @@
+{
+  "info": {
+    "name": "Smart Carpark API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "refreshToken",
+      "value": ""
+    },
+    {
+      "key": "transactionId",
+      "value": "t_seed_002"
+    },
+    {
+      "key": "transactionPlateNo",
+      "value": "2ขค5678"
+    },
+    {
+      "key": "memberId",
+      "value": "u2"
+    },
+    {
+      "key": "deviceId",
+      "value": "d1"
+    },
+    {
+      "key": "kioskDeviceId",
+      "value": "K-SEED-001"
+    },
+    {
+      "key": "barrierGateDeviceId",
+      "value": "BG-SEED-001"
+    },
+    {
+      "key": "activationCode",
+      "value": ""
+    },
+    {
+      "key": "paymentMethodId",
+      "value": "cash"
+    },
+    {
+      "key": "paymentChannelId",
+      "value": "ch_cashier"
+    },
+    {
+      "key": "kioskDeviceToken",
+      "value": ""
+    },
+    {
+      "key": "barrierGateDeviceToken",
+      "value": ""
+    },
+    {
+      "key": "cameraDeviceId",
+      "value": ""
+    },
+    {
+      "key": "cameraDeviceToken",
+      "value": ""
+    },
+    {
+      "key": "printerDeviceId",
+      "value": ""
+    },
+    {
+      "key": "printerDeviceToken",
+      "value": ""
+    },
+    {
+      "key": "chargeId",
+      "value": ""
+    },
+    {
+      "key": "kioskEdcTerminalId",
+      "value": "TID-12345678"
+    },
+    {
+      "key": "edcDeviceId",
+      "value": ""
+    },
+    {
+      "key": "cashierEdcDeviceId",
+      "value": ""
+    },
+    {
+      "key": "pricingConfigUpdatedAt",
+      "value": ""
+    },
+    {
+      "key": "simulationToken",
+      "value": ""
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "System",
+      "item": [
+        {
+          "name": "Root",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/"
+          }
+        },
+        {
+          "name": "Health",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/health"
+          }
+        },
+        {
+          "name": "DB Health",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/health/db"
+          }
+        },
+        {
+          "name": "OpenAPI JSON",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/docs/openapi.json"
+          }
+        },
+        {
+          "name": "Swagger UI",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/docs"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.token) pm.collectionVariables.set('token', json.token);",
+                  "if (json.refreshToken) pm.collectionVariables.set('refreshToken', json.refreshToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"superadmin\",\n  \"password\": \"123456\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.token) pm.collectionVariables.set('token', json.token);",
+                  "if (json.refreshToken) pm.collectionVariables.set('refreshToken', json.refreshToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/refresh",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/auth/me"
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/api/auth/logout"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/dashboard"
+          }
+        },
+        {
+          "name": "Dashboard Events SSE",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/dashboard/events"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Overview",
+      "item": [
+        {
+          "name": "Overview",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/overview?startDate=2026-05-01&endDate=2026-05-31"
+          }
+        },
+        {
+          "name": "Overview Events SSE",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/overview/events?startDate=2026-05-01&endDate=2026-05-31"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Transactions",
+      "item": [
+        {
+          "name": "List Transactions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/transactions?page=1&per_page=10"
+          }
+        },
+        {
+          "name": "Search Transactions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/transactions?keyword=PK&page=1&per_page=10"
+          }
+        },
+        {
+          "name": "Search Transactions All By Plate",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/transactions?keyword=กข1234&all=true"
+          }
+        },
+        {
+          "name": "Transaction Events SSE",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/transactions/events?page=1&per_page=10"
+          }
+        },
+        {
+          "name": "Create Transaction From Camera",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/transactions",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"plateNo\": \"1กก1234\",\n  \"vehicleType\": \"car\",\n  \"cameraId\": \"CAM-IN-01\",\n  \"direction\": \"IN\",\n  \"capturedAt\": \"2026-05-22T10:30:00+07:00\",\n  \"confidence\": 0.92,\n  \"imageUrl\": \"https://example.com/plate.jpg\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Transaction By Plate",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/transactions/{{transactionPlateNo}}"
+          }
+        },
+        {
+          "name": "Process Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/transactions/{{transactionPlateNo}}/payment",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"method\": \"cash\",\n  \"channel\": \"cashier\",\n  \"amount\": 40\n}"
+            }
+          }
+        },
+        {
+          "name": "Process EDC Card Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/transactions/{{transactionPlateNo}}/payment",
+            "description": "Card taken on the counter EDC terminal. reference and edcDeviceId (from Admin EDC Terminals) are required for method card.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"method\": \"card\",\n  \"channel\": \"cashier\",\n  \"reference\": \"APPR-123456\",\n  \"edcDeviceId\": \"{{cashierEdcDeviceId}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Patch Transaction",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/transactions/{{transactionPlateNo}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"plateNo\": \"8ขช1001\",\n  \"vehicleType\": \"car\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Change Transaction Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/transactions/{{transactionPlateNo}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"cancelled\"\n}"
+            },
+            "description": "Status is changed through PATCH /transactions/:plateNo (the /status route was removed)."
+          }
+        },
+        {
+          "name": "Delete Transaction",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/transactions/{{transactionPlateNo}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Members",
+      "item": [
+        {
+          "name": "List Members",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/members?status=active",
+            "description": "Returns { data, meta } with member stats in meta. Filters: keyword, status, role (no pagination)."
+          }
+        },
+        {
+          "name": "Create Member",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/members",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"member_test\",\n  \"password\": \"123456\",\n  \"name\": \"Member Test\",\n  \"email\": \"member_test@example.com\",\n  \"phone\": \"0800000088\",\n  \"role\": \"staff\",\n  \"permissions\": [\"dashboard\", \"transactions\"],\n  \"status\": \"active\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Member",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/members/{{memberId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Member\",\n  \"status\": \"active\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Member Permissions",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/members/{{memberId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"permissions\": [\"dashboard\", \"transactions\", \"overview\"]\n}"
+            },
+            "description": "Permissions are changed through PATCH /members/:id (the /permissions route was removed)."
+          }
+        },
+        {
+          "name": "Delete Member",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/members/{{memberId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pricing",
+      "item": [
+        {
+          "name": "Get Pricing",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/pricing"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.configUpdatedAt) pm.collectionVariables.set('pricingConfigUpdatedAt', json.configUpdatedAt);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Pricing",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/pricing",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"configUpdatedAt\": \"{{pricingConfigUpdatedAt}}\",\n  \"pricingRules\": [\n    {\n      \"name\": \"Car first 3 hours\",\n      \"feeType\": \"base_hour\",\n      \"vehicleType\": \"car\",\n      \"hourEnd\": 3,\n      \"price\": 30,\n      \"status\": \"active\"\n    },\n    {\n      \"name\": \"Car next hours\",\n      \"feeType\": \"next_hour\",\n      \"vehicleType\": \"car\",\n      \"hourStart\": 4,\n      \"hourEnd\": 24,\n      \"price\": 20,\n      \"status\": \"active\"\n    },\n    {\n      \"name\": \"Car overnight\",\n      \"feeType\": \"overnight_day\",\n      \"vehicleType\": \"car\",\n      \"price\": 100,\n      \"status\": \"active\"\n    }\n  ]\n}"
+            },
+            "description": "Only write endpoint for pricing: send the whole pricingRules array (add = no id, edit = keep id, delete = leave out). Send configUpdatedAt from GET /config; an old value returns 409 PRICING_CONFIG_CONFLICT."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.configUpdatedAt) pm.collectionVariables.set('pricingConfigUpdatedAt', json.configUpdatedAt);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Payment Settings",
+      "item": [
+        {
+          "name": "List Methods",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/payment-settings/methods"
+          }
+        },
+        {
+          "name": "Patch Method",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/payment-settings/methods/{{paymentMethodId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isActive\": true,\n  \"label\": \"Cash\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Method",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/payment-settings/methods/{{paymentMethodId}}",
+            "description": "Only custom methods can be deleted; core methods return 409 PAYMENT_METHOD_PROTECTED (use isActive: false instead)."
+          }
+        },
+        {
+          "name": "List Channels",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/payment-settings/channels"
+          }
+        },
+        {
+          "name": "Patch Channel Mapping",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/payment-settings/channels/{{paymentChannelId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"allowedMethods\": [\"cash\", \"qr\", \"bank1\"]\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Channel",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/payment-settings/channels/{{paymentChannelId}}",
+            "description": "Only custom channels can be deleted; ch_cashier, ch_kiosk, ch_mobile, ch_gate return 409 PAYMENT_CHANNEL_PROTECTED."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Theme",
+      "item": [
+        {
+          "name": "Get Theme",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/theme"
+          }
+        },
+        {
+          "name": "Update Theme",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/theme",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"themeColor\": \"#FFD54F\",\n  \"logoUrl\": null,\n  \"themeMode\": \"custom\",\n  \"customThemeColor\": \"#FFD54F\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Upload Logo",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/api/theme/logo",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "logo",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Logo",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/theme/logo"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Devices",
+      "item": [
+        {
+          "name": "List Devices",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/devices"
+          }
+        },
+        {
+          "name": "List Cameras",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/devices?deviceType=camera"
+          }
+        },
+        {
+          "name": "Device Events SSE",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/devices/events"
+          }
+        },
+        {
+          "name": "Create Kiosk Activation Code",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/devices",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"deviceName\": \"Kiosk Lobby\",\n  \"deviceType\": \"kiosk\",\n  \"location\": \"Lobby\",\n  \"printerIds\": []\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.CodeActivate) pm.collectionVariables.set('activationCode', json.CodeActivate);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Barrier Gate Activation Code",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/devices",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"deviceName\": \"Exit Gate 1\",\n  \"deviceType\": \"barrier_gate\",\n  \"gateId\": \"G1\",\n  \"direction\": \"OUT\",\n  \"cameraIds\": [],\n  \"printerIds\": []\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.CodeActivate) pm.collectionVariables.set('activationCode', json.CodeActivate);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Provision Camera",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/devices",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"deviceType\": \"camera\",\n  \"deviceName\": \"LPR Camera Exit 1\",\n  \"location\": \"Exit 1\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.device && json.device.deviceId) pm.collectionVariables.set('cameraDeviceId', json.device.deviceId);",
+                  "if (json.deviceToken) pm.collectionVariables.set('cameraDeviceToken', json.deviceToken);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Provision Printer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/devices",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"deviceType\": \"printer\",\n  \"deviceName\": \"Receipt Printer 1\",\n  \"location\": \"Exit 1\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.device && json.device.deviceId) pm.collectionVariables.set('printerDeviceId', json.device.deviceId);",
+                  "if (json.deviceToken) pm.collectionVariables.set('printerDeviceToken', json.deviceToken);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Barrier Gate Mapping",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/devices/{{barrierGateDeviceId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"gateId\": \"G1\",\n  \"direction\": \"OUT\",\n  \"cameraIds\": [\n    \"{{cameraDeviceId}}\"\n  ],\n  \"printerIds\": [\n    \"{{printerDeviceId}}\"\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Kiosk Mapping",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/devices/{{kioskDeviceId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"location\": \"Lobby\",\n  \"printerIds\": [\n    \"{{printerDeviceId}}\"\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Reissue Activation Code",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/api/devices/{{kioskDeviceId}}/activation-code"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.activationCode) pm.collectionVariables.set('activationCode', json.activationCode);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Device",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/devices/{{deviceId}}"
+          }
+        },
+        {
+          "name": "Register EDC Terminal",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/devices",
+            "description": "usage cashier = Admin counter EDC, device = bind to kiosk/barrier gate via edcDeviceId.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"deviceType\": \"edc\",\n  \"deviceName\": \"EDC Kiosk Lobby\",\n  \"terminalId\": \"{{kioskEdcTerminalId}}\",\n  \"provider\": \"KBank\",\n  \"usage\": \"device\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Bind EDC To Kiosk",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/devices/{{kioskDeviceId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"edcDeviceId\": \"{{edcDeviceId}}\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "Admin Payment Methods",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/payments/methods"
+          }
+        },
+        {
+          "name": "Admin EDC Terminals",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/payments/edc/terminals"
+          }
+        },
+        {
+          "name": "Create PromptPay Charge",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/payments/charges",
+            "description": "Admin PromptPay QR (channel cashier). Saves chargeId for the QR, verify, and simulate requests.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"plateNo\": \"{{transactionPlateNo}}\",\n  \"method\": \"promptpay\",\n  \"channel\": \"cashier\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.charge && json.charge.chargeId) pm.collectionVariables.set('chargeId', json.charge.chargeId);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Charge QR Image",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/payments/charges/{{chargeId}}/qr"
+          }
+        },
+        {
+          "name": "List Refunds",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/payments/refunds?status=pending"
+          }
+        },
+        {
+          "name": "Refund Events SSE",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/payments/refunds/events",
+            "description": "Admin SSE (permission transactions). Sends refunds_snapshot on connect, then refund_required and refund_resolved. Money fields are in satang."
+          }
+        },
+        {
+          "name": "Verify Charge",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/api/payments/charges/{{chargeId}}/verify",
+            "description": "Admin (permission transactions). Checks the charge with Omise when it is stuck in pending. Paid charges are recorded once and payment_updated is sent on the payment WebSocket. 1 call per charge every 10 seconds."
+          }
+        },
+        {
+          "name": "Resolve Refund",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/payments/refunds/{{chargeId}}/resolve",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Refunded in cash\"\n}"
+            }
+          }
+        },
+        {
+          "name": "EDC Reconciliation",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/payments/edc/reconciliation?date=2026-10-01"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Client",
+      "item": [
+        {
+          "name": "Client Config",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/client/config"
+          }
+        },
+        {
+          "name": "Activate Kiosk",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/client/activate",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"{{activationCode}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.deviceId) pm.collectionVariables.set('kioskDeviceId', json.deviceId);",
+                  "if (json.deviceToken) pm.collectionVariables.set('kioskDeviceToken', json.deviceToken);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Activate Barrier Gate",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/client/activate",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"{{activationCode}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.deviceId) pm.collectionVariables.set('barrierGateDeviceId', json.deviceId);",
+                  "if (json.deviceToken) pm.collectionVariables.set('barrierGateDeviceToken', json.deviceToken);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Kiosk Heartbeat",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-device-id",
+                "value": "{{kioskDeviceId}}"
+              },
+              {
+                "key": "x-device-token",
+                "value": "{{kioskDeviceToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/client/heartbeat",
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          }
+        },
+        {
+          "name": "Camera Heartbeat",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-device-id",
+                "value": "{{cameraDeviceId}}"
+              },
+              {
+                "key": "x-device-token",
+                "value": "{{cameraDeviceToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/client/heartbeat",
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          }
+        },
+        {
+          "name": "Printer Heartbeat",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-device-id",
+                "value": "{{printerDeviceId}}"
+              },
+              {
+                "key": "x-device-token",
+                "value": "{{printerDeviceToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/client/heartbeat",
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          }
+        },
+        {
+          "name": "Kiosk Events SSE",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-device-id",
+                "value": "{{kioskDeviceId}}"
+              },
+              {
+                "key": "x-device-token",
+                "value": "{{kioskDeviceToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/client/events?deviceId={{kioskDeviceId}}"
+          }
+        },
+        {
+          "name": "Barrier Gate Events SSE",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-device-id",
+                "value": "{{barrierGateDeviceId}}"
+              },
+              {
+                "key": "x-device-token",
+                "value": "{{barrierGateDeviceToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/client/events?deviceId={{barrierGateDeviceId}}&gateId=G1&direction=OUT"
+          }
+        },
+        {
+          "name": "Mobile Lookup Transaction",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/client/transactions?plateNo={{transactionPlateNo}}"
+          }
+        },
+        {
+          "name": "Kiosk Lookup Transaction",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-device-id",
+                "value": "{{kioskDeviceId}}"
+              },
+              {
+                "key": "x-device-token",
+                "value": "{{kioskDeviceToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/client/transactions?plateNo={{transactionPlateNo}}"
+          }
+        },
+        {
+          "name": "Get Transaction By Id",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/client/transactions/{{transactionId}}"
+          }
+        },
+        {
+          "name": "[Dev Test] Mobile Payment",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/client/payments/test",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"plateNo\": \"{{transactionPlateNo}}\",\n  \"method\": \"qr\"\n}"
+            },
+            "description": "Dev Test: works only when the API runs with ENABLE_PAYMENT_SIMULATION=true (same switch as simulate-paid); otherwise returns 403 PAYMENT_SIMULATION_DISABLED."
+          }
+        },
+        {
+          "name": "[Dev Test] Kiosk Payment",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-device-id",
+                "value": "{{kioskDeviceId}}"
+              },
+              {
+                "key": "x-device-token",
+                "value": "{{kioskDeviceToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/client/payments/test",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"plateNo\": \"{{transactionPlateNo}}\",\n  \"method\": \"qr\"\n}"
+            },
+            "description": "Dev Test: works only when the API runs with ENABLE_PAYMENT_SIMULATION=true (same switch as simulate-paid); otherwise returns 403 PAYMENT_SIMULATION_DISABLED."
+          }
+        },
+        {
+          "name": "[Dev Test] Barrier Gate Payment",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-device-id",
+                "value": "{{barrierGateDeviceId}}"
+              },
+              {
+                "key": "x-device-token",
+                "value": "{{barrierGateDeviceToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/client/payments/test",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"plateNo\": \"{{transactionPlateNo}}\",\n  \"method\": \"wallet\"\n}"
+            },
+            "description": "Dev Test: works only when the API runs with ENABLE_PAYMENT_SIMULATION=true (same switch as simulate-paid); otherwise returns 403 PAYMENT_SIMULATION_DISABLED."
+          }
+        },
+        {
+          "name": "Kiosk PromptPay Charge",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-device-id",
+                "value": "{{kioskDeviceId}}"
+              },
+              {
+                "key": "x-device-token",
+                "value": "{{kioskDeviceToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/client/payments/charges",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"plateNo\": \"{{transactionPlateNo}}\",\n  \"method\": \"promptpay\"\n}"
+            },
+            "description": "PromptPay only: backend creates the Omise source itself, so no Omise.js source is needed."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.charge && json.charge.chargeId) pm.collectionVariables.set('chargeId', json.charge.chargeId);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Kiosk Payment Methods",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-device-id",
+                "value": "{{kioskDeviceId}}"
+              },
+              {
+                "key": "x-device-token",
+                "value": "{{kioskDeviceToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/client/payments/methods?deviceId={{kioskDeviceId}}"
+          }
+        },
+        {
+          "name": "Kiosk EDC Card Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-device-id",
+                "value": "{{kioskDeviceId}}"
+              },
+              {
+                "key": "x-device-token",
+                "value": "{{kioskDeviceToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/client/payments/edc",
+            "description": "Record a card payment approved on the Kiosk EDC terminal. Same reference again returns duplicate: true.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"plateNo\": \"{{transactionPlateNo}}\",\n  \"amount\": 40,\n  \"reference\": \"APPR-123456\",\n  \"terminalId\": \"{{kioskEdcTerminalId}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Client QR Image",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/client/payments/charges/{{chargeId}}/qr"
+          }
+        },
+        {
+          "name": "Camera LPR Event",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-device-id",
+                "value": "{{cameraDeviceId}}"
+              },
+              {
+                "key": "x-device-token",
+                "value": "{{cameraDeviceToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/transactions",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"plateNo\": \"{{transactionPlateNo}}\",\n  \"cameraId\": \"{{cameraDeviceId}}\",\n  \"direction\": \"OUT\",\n  \"vehicleType\": \"car\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payment Gateway",
+      "item": [
+        {
+          "name": "Simulate Charge Paid",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-simulation-token",
+                "value": "{{simulationToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/payment-gateway/omise/simulate-paid",
+            "description": "UAT only: requires ENABLE_PAYMENT_SIMULATION=true. Marks the saved charge successful, records the payment, and emits payment_updated. Send PAYMENT_SIMULATION_TOKEN when it is configured.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"chargeId\": \"{{chargeId}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Omise Webhook",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/payment-gateway/omise/webhook",
+            "description": "Called by Omise. When OMISE_WEBHOOK_SECRET is set, a request without a valid Omise signature is rejected; without it (local dev) the backend still reads the live charge from Omise, so chargeId must be a real Omise charge. Use Simulate Charge Paid for manual testing.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"key\": \"charge.complete\",\n  \"data\": {\n    \"object\": \"charge\",\n    \"id\": \"{{chargeId}}\"\n  }\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "System Settings",
+      "item": [
+        {
+          "name": "Get Settings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/system-settings"
+          }
+        },
+        {
+          "name": "Update Settings",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/system-settings",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"general\": {\n    \"systemName\": \"Smart Carpark UAT\",\n    \"location\": \"Main Building\",\n    \"language\": \"th\",\n    \"timezone\": \"Asia/Bangkok\",\n    \"frontendUrl\": \"http://localhost:3000\"\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Receipt Settings",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/system-settings",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"receipt\": {\n    \"entryBill\": {\n      \"showDate\": true,\n      \"showEntryTime\": true,\n      \"showQrCode\": true,\n      \"showBillNo\": true\n    },\n    \"paymentBill\": {\n      \"showDate\": true,\n      \"showEntryTime\": true,\n      \"showQrCode\": true,\n      \"showBillNo\": true,\n      \"showExpiryTime\": true,\n      \"expiryDuration\": 15\n    }\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Printer Settings",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/system-settings",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"receipt\": {\n    \"printer\": {\n      \"fontSize\": 12,\n      \"billNumberFontSize\": 16,\n      \"paperWidth\": 80\n    }\n  }\n}"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
