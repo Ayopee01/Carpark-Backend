@@ -7,10 +7,16 @@ updates:
     open-pull-requests-limit: 5
     commit-message:
       prefix: "อัปเดต package"
-    # รวม minor/patch เป็น PR เดียว ส่วน major แยก PR ตาม package
+    # minor/patch รวมเป็น PR เดียว และ major รวมอีก PR (major อาจมี breaking change ตรวจก่อน merge)
     groups:
       npm-minor-patch:
         update-types: ["minor", "patch"]
+      npm-major:
+        update-types: ["major"]
+    ignore:
+      # @types/node ต้องตรงกับ Node ที่รันจริง (node:20 ใน Dockerfile และ CI) เปลี่ยน major พร้อมกับตอนอัปเกรด Node
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: github-actions
     directory: /
     schedule:
@@ -18,6 +24,7 @@ updates:
     open-pull-requests-limit: 5
     commit-message:
       prefix: "อัปเดต action"
+    # ทุก action รวมเป็น PR เดียว CI ตรวจให้ก่อน merge
     groups:
-      actions-minor-patch:
-        update-types: ["minor", "patch"]
+      actions:
+        patterns: ["*"]
