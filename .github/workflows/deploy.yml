@@ -35,7 +35,7 @@ jobs:
         if: env.DEPLOY_CONFIGURED != 'true'
         run: echo "::notice::ยังไม่ได้ตั้ง SSH_HOST ใน environment production จึงข้ามการ deploy"
       # แปลง ref เป็น commit เต็มและชื่อ image sha-<7 ตัว> ให้ตรงกับที่ CI push ไว้
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         if: env.DEPLOY_CONFIGURED == 'true'
         with:
           ref: ${{ inputs.ref }}
