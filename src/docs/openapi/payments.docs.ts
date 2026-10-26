@@ -1,0 +1,115 @@
+// Import Docs
+import { bearer, bearer403, body, error, idParam, ok, query, ref } from './helpers';
+
+/* -------------------------------------- Paths -------------------------------------- */
+
+// Config OpenAPI paths ของ tag Payments
+const paths = {
+  '/api/payments/charges': {
+    post: {
+      tags: ['Payments'],
+      summary: 'Create Omise charge for Admin payment',
+      description: 'Source-based charges only (PromptPay QR). For PromptPay the frontend may omit source and send method promptpay; the backend creates the PromptPay source with the secret key (Omise.js not needed). Admin card payments are taken on the EDC terminal, so a card token returns 400 VALIDATION_ERROR. Checks payment settings before calling Omise: method (for example promptpay) must be active and in ch_cashier allowedMethods, otherwise 400 PAYMENT_SELECTION_INVALID and no charge is created. If the transaction already has a pending charge with the same method, channel, and amount (and the QR is not about to expire), the existing charge is returned with reused: true instead of creating a second QR, so the customer cannot pay twice. Admin PromptPay/QR payment endpoint. Requires Bearer auth and transactions permission. This endpoint always stores gateway charges with channel cashier so Admin QR is counted under cashier, while scan revenue still comes from method promptpay/qr. Realtime updates are sent as payments:updated on the Socket.IO /admin namespace after payments:subscribe { chargeId } (connect with the access token in auth.token; the user must have transactions permission). See docs/API.md sections 17-18 for connect errors and session handling. returnUri, when sent, must be an http or https URL. PromptPay needs a remaining amount of at least 20 THB (Omise minimum); below it the backend returns 400 AMOUNT_BELOW_GATEWAY_MINIMUM with minimumAmount and remainingAmount (THB) without calling Omise. Do not use the public client charge endpoint (POST /api/client/payments/charges) for Admin payments.',
+      security: bearer,
+      requestBody: body(ref('AdminOmiseChargeRequest'), {
+        transactionId: 't_123',
+        method: 'promptpay',
+        channel: 'cashier',
+        amount: 4000,
+      }),
+      responses: {
+        201: ok('Admin Omise charge created (or the pending charge reused, see charge.reused)', ref('OmiseChargeResponse')),
+        400: error('transactionId/plateNo, source/token, channel, or amount is invalid, or AMOUNT_BELOW_GATEWAY_MINIMUM'),
+        404: error('Transaction not found'),
+        409: error('Multiple plate matches require user selection'),
+        ...bearer403,
+      },
+    },
+  },
+  '/api/payments/edc/terminals': {
+    get: {
+      tags: ['Payments'],
+      summary: 'List cashier EDC terminals',
+      description: 'Requires permission: transactions. Active EDC devices with usage cashier, for staff to choose the counter EDC before taking cards. Response: { data: [{ deviceId, deviceName, terminalId, location, provider }] }. Send the chosen deviceId as edcDeviceId in POST /api/transactions/{plateNo}/payment.',
+      security: bearer,
+      responses: { 200: ok('Cashier EDC terminals'), ...bearer403 },
+    },
+  },
+  '/api/payments/methods': {
+    get: {
+      tags: ['Payments'],
+      summary: 'List payment methods available for Admin (cashier)',
+      description: 'Requires permission: transactions (no pricing permission needed). Returns only methods that are active and allowed in ch_cashier, in allowedMethods order, so the Admin payment screen shows only methods that can be recorded. card is included only when at least one active cashier EDC exists.',
+      security: bearer,
+      responses: { 200: ok('Available payment methods', {
+          type: 'object',
+          properties: {
+            channel: { type: 'string', example: 'kiosk' },
+            methods: { type: 'array', items: { type: 'object', properties: { id: { type: 'string', example: 'promptpay' }, label: { type: 'string', example: 'PromptPay' }, icon: { type: 'string', nullable: true, example: 'qr' } } } },
+          },
+        }), ...bearer403 },
+    },
+  },
+  '/api/payments/charges/{chargeId}/verify': {
+    post: {
+      tags: ['Payments'],
+      summary: 'Check an Omise charge status with Omise',
+      description: 'Requires permission: transactions. Manual fallback for a charge stuck in pending (for example when the Omise webhook did not arrive); do not call it on a timer. Reads the live charge from Omise. If it is paid, records the payment once (same path as the webhook) and emits payments:updated on Socket.IO, so screens can rely on Socket.IO only. failed/expired/reversed are saved and emitted too; a pending charge returns action pending without an event. Rate limit: 1 call per charge every 10 seconds (429 CHARGE_VERIFY_TOO_FREQUENT with Retry-After).',
+      security: bearer,
+      parameters: [{ name: 'chargeId', in: 'path', required: true, schema: { type: 'string' }, example: 'chrg_test_123' }],
+      responses: {
+        200: ok('Charge verified', { type: 'object', properties: { message: { type: 'string' }, action: { type: 'string', enum: ['processed', 'refund_required', 'already_processed', 'pending', 'updated'] }, chargeId: { type: 'string' }, status: { type: 'string' }, refundAmount: { type: 'integer' }, refundReason: { type: 'string' }, transaction: ref('AnyObject') } }, { message: 'Charge verified', action: 'pending', chargeId: 'chrg_test_123', status: 'pending' }),
+        400: error('NOT_OMISE_CHARGE'),
+        404: error('GATEWAY_CHARGE_NOT_FOUND'),
+        429: error('CHARGE_VERIFY_TOO_FREQUENT'),
+        504: error('OMISE_TIMEOUT'),
+        ...bearer403,
+      },
+    },
+  },
+  '/api/payments/refunds/{chargeId}/resolve': {
+    post: {
+      tags: ['Payments'],
+      summary: 'Mark an Omise refund as done',
+      description: 'Requires permission: transactions. Records that the customer was refunded manually (PromptPay cannot be refunded through Omise). Stores the admin user id and optional note, then emits refund_resolved and dashboard_updated on /api/dashboard/events. Concurrent resolves of the same charge succeed once; the others return 409 REFUND_ALREADY_RESOLVED. The returned charge does not include the raw Omise charge.',
+      security: bearer,
+      parameters: [{ name: 'chargeId', in: 'path', required: true, schema: { type: 'string' }, example: 'chrg_test_123' }],
+      requestBody: body(ref('ResolveRefundRequest'), { note: 'Refunded by bank transfer' }, false),
+      responses: {
+        200: ok('Refund resolved'),
+        400: error('REFUND_NOT_REQUIRED'),
+        404: error('GATEWAY_CHARGE_NOT_FOUND'),
+        409: error('REFUND_ALREADY_RESOLVED'),
+        ...bearer403,
+      },
+    },
+  },
+  '/api/payments/charges/{chargeId}/qr': {
+    get: {
+      tags: ['Payments'],
+      summary: 'Proxy Admin Omise PromptPay QR image',
+      description: 'Admin helper endpoint for displaying PromptPay QR images. Requires Bearer auth and transactions permission. Uses the saved Omise charge in the path (optional documentPath query downloads that Omise document instead) and does not apply mobile/kiosk/gate client source logic.',
+      security: bearer,
+      parameters: [
+        idParam('chargeId', 'chrg_test_123'),
+        query('documentPath', { type: 'string' }, '/charges/chrg_test_123/documents/docu_test_123'),
+      ],
+      responses: {
+        200: {
+          description: 'QR image binary',
+          content: {
+            'image/png': { schema: { type: 'string', format: 'binary' } },
+            'image/jpeg': { schema: { type: 'string', format: 'binary' } },
+            'image/svg+xml': { schema: { type: 'string', format: 'binary' } },
+          },
+        },
+        400: error('Invalid chargeId or documentPath'),
+        404: error('Gateway charge not found'),
+        502: error('Unable to load Omise QR image'),
+        ...bearer403,
+      },
+    },
+  },
+};
+
+export default paths;
